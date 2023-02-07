@@ -5,10 +5,8 @@ using UnityEngine.Tilemaps;
 
 public class NodeGridGenerator : MonoBehaviour
 {
-    [SerializeField] Tilemap tilemap;
-    [SerializeField] Tilemap tilemap2;
     [SerializeField] List<Tilemap> tilemaps;
-    [SerializeField] GameObject node;
+    [SerializeField] GameObject nodePrefab;
     [SerializeField] GameObject obstacleNode;
     [SerializeField] GameObject origin;
 
@@ -26,6 +24,7 @@ public class NodeGridGenerator : MonoBehaviour
 
     public void GenerateNodeGrid()
     {
+        float nameIndex = 0;
 
         ClearNodes();
 
@@ -54,12 +53,14 @@ public class NodeGridGenerator : MonoBehaviour
                     {
                         if (map == tilemaps[0])
                         {
-                            GameObject nodeObject = Instantiate(node, new Vector2(x, y), Quaternion.identity);
+                            GameObject nodeObject = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
                             nodeObject.transform.SetParent(map.transform);
-                            Node script = nodeObject.GetComponent<Node>();
+                            nodeObject.name = "node" + nameIndex;
+                            nameIndex++;
+                            Node nodeScript = nodeObject.GetComponent<Node>();
 
-                            script.walkable = true;
-                            script.sprite.color = new Color32(255, 255, 255, 100);
+                            nodeScript.walkable = true;
+                            nodeScript.sprite.color = new Color32(255, 255, 255, 100);
 
                             walkableNodes.Add(nodeObject);
                             //nodes.Add(nodeObject);
@@ -80,13 +81,39 @@ public class NodeGridGenerator : MonoBehaviour
                 }
             }
         }
+
+        CheckOverlap();
+
+        SetNeighbours();
     }
 
     private void CheckOverlap()
     {
-        foreach(GameObject node in obstacleNodes)
+        foreach(GameObject oNode in obstacleNodes)
         {
+            for(int i = 0; i < walkableNodes.Count; i++)
+            {
+                if (walkableNodes[i].transform.position == oNode.transform.position)
+                {
+                    DestroyImmediate(walkableNodes[i]);
+                    walkableNodes.Remove(walkableNodes[i]);
+                }
+            }
+        }
+    }
 
+    private void SetNeighbours()
+    {
+        for(int i = 0; i < walkableNodes.Count; i++)
+        {
+            foreach(GameObject node in walkableNodes)
+            {
+                float distance = (node.transform.position - walkableNodes[i].transform.position).magnitude;
+                if(distance < 1.5f && distance > 0)
+                {
+                    walkableNodes[i].GetComponent<Node>().neighbours.Add(node.GetComponent<Node>());
+                }
+            }
         }
     }
 

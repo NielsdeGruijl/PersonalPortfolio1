@@ -36,7 +36,7 @@ public class Pathfinding : MonoBehaviour
 
             if (currentNode == targetNode)
             {
-                foreach (Node node in open)
+/*                foreach (Node node in open)
                 {
                     node.EnablePathHighlight(true);
                     node.spriteRenderer.color = Color.cyan;
@@ -46,7 +46,7 @@ public class Pathfinding : MonoBehaviour
                 {
                     node.EnablePathHighlight(true);
                     node.spriteRenderer.color = Color.red;
-                }
+                }*/
 
                 Debug.Log("Path found!");    
                 return RetracePath(startNode, targetNode);

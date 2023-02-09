@@ -9,7 +9,7 @@ public class Pathfinding : MonoBehaviour
 
     private List<GameObject> nodes = new List<GameObject>();
 
-    List<Node> path = new List<Node>();
+    private List<Node> path = new List<Node>();
 
     private void Start()
     {
@@ -17,7 +17,7 @@ public class Pathfinding : MonoBehaviour
         nodes = grid.walkableNodes;
     }
 
-    public void FindPath(Node startNode, Node targetNode)
+    public List<Node> FindPath(Node startNode, Node targetNode)
     {
         List<Node> open = new List<Node>();
         List<Node> closed = new List<Node>();
@@ -29,37 +29,36 @@ public class Pathfinding : MonoBehaviour
         while (open.Count > 0)
         {
             Node currentNode = FindLowestFCost(open);
-            //Debug.Log($"Chosen node: {currentNode.name} gCost: {currentNode.GCost} hCost: {currentNode.HCost} fCost: {currentNode.FCost}");
             open.Remove(currentNode);
             closed.Add(currentNode);
 
+            
+
             if (currentNode == targetNode)
             {
-                Debug.Log("Path found!");
-
-/*                foreach (Node node in open)
+                foreach (Node node in open)
                 {
                     node.EnablePathHighlight(true);
+                    node.spriteRenderer.color = Color.cyan;
                 }
 
                 foreach (Node node in closed)
                 {
                     node.EnablePathHighlight(true);
                     node.spriteRenderer.color = Color.red;
-                }*/
+                }
 
-                RetracePath(startNode, targetNode);
-                return;
+                Debug.Log("Path found!");    
+                return RetracePath(startNode, targetNode);
             }
 
             foreach (Node neighbour in currentNode.neighbours)
             {
-                if (closed.Contains(neighbour)) continue;
+                if (closed.Contains(neighbour) || !neighbour.walkable) continue;
 
                 int newPathCostToNeighBour = currentNode.GCost + neighbour.CalculateDistance(currentNode);
                 if (newPathCostToNeighBour < neighbour.GCost || !open.Contains(neighbour))
                 {
-                    //neighbour.CalculateFCost(startNode, targetNode);
                     neighbour.GCost = newPathCostToNeighBour;
                     neighbour.HCost = neighbour.CalculateDistance(targetNode);
                     neighbour.parent = currentNode;
@@ -71,19 +70,11 @@ public class Pathfinding : MonoBehaviour
                 }
             }
         }
+        return null;
     }
 
-    private void RetracePath(Node startNode, Node endNode)
+    private List<Node> RetracePath(Node startNode, Node endNode)
     {
-        if (path.Count > 0)
-        {
-            foreach (Node node in path)
-            {
-                node.EnablePathHighlight(false);
-                node.spriteRenderer.color = Color.cyan;
-            }
-        }
-
         path = new List<Node>();
         Node currentNode = endNode;
 
@@ -92,13 +83,9 @@ public class Pathfinding : MonoBehaviour
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
-        path.Reverse();
 
-        foreach (Node node in path)
-        {
-            node.EnablePathHighlight(true);
-            node.spriteRenderer.color = Color.magenta;
-        }
+        path.Reverse();
+        return path;
     }
 
     private void ResetPathFinder()

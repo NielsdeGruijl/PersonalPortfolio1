@@ -24,7 +24,7 @@ public class NodeGridGenerator : MonoBehaviour
 
     public void GenerateNodeGrid()
     {
-        float nameIndex = 0;
+        int nameIndex = 0;
 
         ClearNodes();
 
@@ -36,6 +36,8 @@ public class NodeGridGenerator : MonoBehaviour
 
         foreach (Tilemap map in tilemaps)
         {
+            TilemapType mapScript = map.GetComponentInParent<TilemapType>();
+
             mapWidth = map.size.x;
             mapHeight = map.size.y;
 
@@ -51,31 +53,13 @@ public class NodeGridGenerator : MonoBehaviour
 
                     if (map.HasTile(new Vector3Int(Mathf.FloorToInt(x), Mathf.FloorToInt(y), 0)))
                     {
-                        if (map == tilemaps[0])
+                        if (mapScript.walkable)
                         {
-                            GameObject nodeObject = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
-                            nodeObject.transform.SetParent(map.transform);
-                            nodeObject.name = "node" + nameIndex;
-                            nameIndex++;
-                            Node nodeScript = nodeObject.GetComponent<Node>();
-
-                            nodeScript.walkable = true;
-                            nodeScript.sprite.color = new Color32(255, 255, 255, 100);
-
-                            walkableNodes.Add(nodeObject);
-                            //nodes.Add(nodeObject);
+                            SetWalkableNode(map, nameIndex, x, y);
                         }
-                        if (map == tilemaps[1])
+                        if (mapScript.obstacle)
                         {
-                            GameObject nodeObject = Instantiate(obstacleNode, new Vector2(x, y), Quaternion.identity);
-                            nodeObject.transform.SetParent(map.transform);
-                            Node script = nodeObject.GetComponent<Node>();
-
-                            script.walkable = false;
-                            script.sprite.color = new Color32(255, 0, 0, 100);
-
-                            obstacleNodes.Add(nodeObject);
-                            //nodes.Add(nodeObject);
+                            SetObstacleNode(map, x, y);
                         }
                     }
                 }
@@ -85,6 +69,33 @@ public class NodeGridGenerator : MonoBehaviour
         CheckOverlap();
 
         SetNeighbours();
+    }
+
+    private void SetWalkableNode(Tilemap map, int nameIndex, float x, float y)
+    {
+        GameObject nodeObject = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
+        nodeObject.transform.SetParent(map.transform);
+        nodeObject.name = "node" + nameIndex;
+        nameIndex++;
+        Node nodeScript = nodeObject.GetComponent<Node>();
+
+        nodeScript.walkable = true;
+        nodeScript.sprite.color = new Color32(255, 255, 255, 100);
+
+        walkableNodes.Add(nodeObject);
+    }
+
+    private void SetObstacleNode(Tilemap map, float x, float y)
+    {
+        GameObject nodeObject = Instantiate(obstacleNode, new Vector2(x, y), Quaternion.identity);
+        nodeObject.transform.SetParent(map.transform);
+        Node script = nodeObject.GetComponent<Node>();
+
+        script.isObstacle = true;
+        script.walkable = false;
+        script.sprite.color = new Color32(255, 0, 0, 100);
+
+        obstacleNodes.Add(nodeObject);
     }
 
     private void CheckOverlap()
@@ -109,7 +120,7 @@ public class NodeGridGenerator : MonoBehaviour
             foreach(GameObject node in walkableNodes)
             {
                 float distance = (node.transform.position - walkableNodes[i].transform.position).magnitude;
-                if(distance < 1.5f && distance > 0)
+                if(distance < 1.1f && distance > 0)
                 {
                     walkableNodes[i].GetComponent<Node>().neighbours.Add(node.GetComponent<Node>());
                 }

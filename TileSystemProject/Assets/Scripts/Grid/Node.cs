@@ -5,38 +5,55 @@ using TMPro;
 
 public class Node : MonoBehaviour
 {
-    [SerializeField] TextMeshPro GCostText;
-    [SerializeField] TextMeshPro HCostText;
-    [SerializeField] TextMeshPro FCostText;
+    [HideInInspector] public SpriteRenderer sprite;
+    [HideInInspector] public GameObject neighbourHighlight;
+    [HideInInspector] public SpriteRenderer spriteRenderer;
 
-    public SpriteRenderer sprite;
-    public GameObject neighbourHighlight;
+    [HideInInspector] public bool highlighted = false;
 
-    public SpriteRenderer spriteRenderer;
+    [Header("Tile info")]
+    public bool isObstacle;
+    public bool walkable;
+    public bool occupied = false;
 
+    [Header("PathFinder info")]
+    [SerializeField] private TextMeshPro GCostText;
+    [SerializeField] private TextMeshPro HCostText;
+    [SerializeField] private TextMeshPro FCostText;
+    [Space(10)]
     public List<Node> neighbours;
     public Node parent;
-
-    public bool walkable;
-    public bool highlighted = false;
 
     [Header("Pathfinder costs")]
     public int GCost;
     public int HCost;
     public int FCost;
 
+
+    private PlayerScript player;
+
     private void Start()
     {
-        gameObject.SetActive(true);
-
-        gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-
         spriteRenderer.color = Color.cyan;
+
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerScript>();
+        sprite = GetComponent<SpriteRenderer>();
+        neighbourHighlight = transform.GetChild(0).gameObject;
+        spriteRenderer = neighbourHighlight.transform.GetChild(0).GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
         sprite.enabled = highlighted;
+
+        if (occupied)
+        {
+            walkable= false;
+        }
+        if(!occupied && !walkable && !isObstacle)
+        {
+            walkable = true;
+        }
     }
 
     public int CalculateDistance(Node targetNode)
@@ -44,11 +61,13 @@ public class Node : MonoBehaviour
         int distX = Mathf.FloorToInt(Mathf.Abs(transform.position.x - targetNode.transform.position.x));
         int distY = Mathf.FloorToInt(Mathf.Abs(transform.position.y - targetNode.transform.position.y));
 
-        if (distX > distY)
-        {
-            return 14 * distY + 10 * (distX - distY);
-        }
-        return 14 * distX + 10 * (distY - distX);
+        /*        if (distX > distY)
+                {
+                    return 14 * distY + 10 * (distX - distY);
+                }
+                return 14 * distX + 10 * (distY - distX);*/
+
+        return 10 * (distX + distY);
     }
 
     public void EnablePathHighlight(bool enable)
@@ -70,5 +89,16 @@ public class Node : MonoBehaviour
     private void OnMouseExit()
     {
         highlighted = false;
+    }
+
+    private void OnMouseDown()
+    {
+        if(player != null && player.gameObject.activeSelf)
+        {
+            if (player.reachedDestination)
+            {
+                player.SetPath(this);
+            }
+        }
     }
 }

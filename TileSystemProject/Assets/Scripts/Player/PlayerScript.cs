@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
+[RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerScript : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class PlayerScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         lineRenderer= GetComponent<LineRenderer>();
+
+        rb.gravityScale = 0;
 
         nodes = GameManagerScript.instance.GetComponent<NodeGridGenerator>().walkableNodes;
         GetGridLocation();

@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
+[RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyScript : MonoBehaviour
 {
@@ -30,6 +31,8 @@ public class EnemyScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         lineRenderer= GetComponent<LineRenderer>();
+
+        rb.gravityScale = 0;
 
         originalMovespeed = moveSpeed;
 

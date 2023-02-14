@@ -32,11 +32,9 @@ public class Pathfinding : MonoBehaviour
             open.Remove(currentNode);
             closed.Add(currentNode);
 
-            
-
             if (currentNode == targetNode)
             {
-/*                foreach (Node node in open)
+                foreach (Node node in open)
                 {
                     node.EnablePathHighlight(true);
                     node.spriteRenderer.color = Color.cyan;
@@ -46,7 +44,7 @@ public class Pathfinding : MonoBehaviour
                 {
                     node.EnablePathHighlight(true);
                     node.spriteRenderer.color = Color.red;
-                }*/
+                }
 
                 Debug.Log("Path found!");    
                 return RetracePath(startNode, targetNode);
@@ -106,7 +104,7 @@ public class Pathfinding : MonoBehaviour
         foreach(Node node in open) 
         {
             // || node.FCost == cheapestNode.FCost && node.HCost < cheapestNode.HCost
-            if (node.FCost < cheapestNode.FCost)
+            if (node.FCost < cheapestNode.FCost || node.FCost == cheapestNode.FCost && node.HCost < cheapestNode.HCost)
             {
                 cheapestNode = node;
             }

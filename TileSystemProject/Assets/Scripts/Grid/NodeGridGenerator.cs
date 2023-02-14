@@ -55,11 +55,26 @@ public class NodeGridGenerator : MonoBehaviour
                     {
                         if (mapScript.walkable)
                         {
-                            SetWalkableNode(map, nameIndex, x, y);
+                            GameObject nodeObject = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
+                            nodeObject.transform.SetParent(map.transform);
+                            nodeObject.name = "node" + nameIndex;
+                            nameIndex++;
+                            Node nodeScript = nodeObject.GetComponent<Node>();
+
+                            nodeScript.walkable = true;
+
+                            walkableNodes.Add(nodeObject);
                         }
                         if (mapScript.obstacle)
                         {
-                            SetObstacleNode(map, x, y);
+                            GameObject nodeObject = Instantiate(obstacleNode, new Vector2(x, y), Quaternion.identity);
+                            nodeObject.transform.SetParent(map.transform);
+                            Node script = nodeObject.GetComponent<Node>();
+
+                            script.isObstacle = true;
+                            script.walkable = false;
+
+                            obstacleNodes.Add(nodeObject);
                         }
                     }
                 }
@@ -69,33 +84,6 @@ public class NodeGridGenerator : MonoBehaviour
         CheckOverlap();
 
         SetNeighbours();
-    }
-
-    private void SetWalkableNode(Tilemap map, int nameIndex, float x, float y)
-    {
-        GameObject nodeObject = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
-        nodeObject.transform.SetParent(map.transform);
-        nodeObject.name = "node" + nameIndex;
-        nameIndex++;
-        Node nodeScript = nodeObject.GetComponent<Node>();
-
-        nodeScript.walkable = true;
-        nodeScript.sprite.color = new Color32(255, 255, 255, 100);
-
-        walkableNodes.Add(nodeObject);
-    }
-
-    private void SetObstacleNode(Tilemap map, float x, float y)
-    {
-        GameObject nodeObject = Instantiate(obstacleNode, new Vector2(x, y), Quaternion.identity);
-        nodeObject.transform.SetParent(map.transform);
-        Node script = nodeObject.GetComponent<Node>();
-
-        script.isObstacle = true;
-        script.walkable = false;
-        script.sprite.color = new Color32(255, 0, 0, 100);
-
-        obstacleNodes.Add(nodeObject);
     }
 
     private void CheckOverlap()
